@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI시대의 보고서 리터러시 · 프롬프트 82선</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --bg: #0b1622;
+    --side: #0f2a44;
+    --side-hover: #16385a;
+    --side-active: #3a3f44;
+    --text: #e6edf3;
+    --muted: #9aa8b6;
+    --line: #2a3a4c;
+    --accent: #1ea7e1;
+    --orange: #f2711c;
+    --card: #1c2738;
+    --card-head: #243247;
+    --field-bg: #4a3a30;
+    --field-line: #2aa7d8;
+    --field-text: #2bb3f0;
+    --mark: #ffcf66;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-size: 15px; line-height: 1.6;
+    display: flex;
+  }
+  button { font: inherit; cursor: pointer; }
+
+  /* 사이드바 */
+  #side {
+    width: 340px; flex: none; height: 100vh; overflow-y: auto;
+    background: var(--side); border-right: 1px solid #0a1f33;
+    display: flex; flex-direction: column;
+  }
+  .brand { padding: 20px 18px 12px; cursor: pointer; }
+  .brand b { display: block; font-size: 17px; }
+  .brand span { font-size: 12.5px; color: var(--muted); }
+  .search { padding: 4px 14px 12px; }
+  .search input {
+    width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #24476b;
+    background: #0b2238; color: var(--text); font: inherit; font-size: 14px; outline: none;
+  }
+  .search input:focus { border-color: var(--accent); }
+  nav { padding-bottom: 40px; }
+  .chap > button {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; background: none; border: 0; color: var(--text);
+    font-size: 15px; font-weight: 600; text-align: left;
+  }
+  .chap > button:hover { background: var(--side-hover); }
+  .chap > button .arrow { margin-left: auto; transition: transform .15s; color: var(--muted); }
+  .chap.closed > button .arrow { transform: rotate(-90deg); }
+  .chap.closed ul { display: none; }
+  .chap ul { list-style: none; margin: 0; padding: 0 0 6px; }
+  .chap li a {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 16px 8px 40px; color: #d3dce6; text-decoration: none; font-size: 14px; line-height: 1.45;
+  }
+  .chap li a:hover { background: var(--side-hover); }
+  .chap li a.active { background: var(--side-active); color: #fff; font-weight: 700; }
+  .chap li a svg { flex: none; margin-top: 2px; color: #b8c4d0; }
+  .chap li a.active svg { color: var(--orange); }
+  svg { width: 16px; height: 16px; }
+
+  /* 본문 */
+  main { flex: 1; height: 100vh; overflow-y: auto; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 32px 28px 80px; }
+  .crumb { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+  h1 { color: var(--accent); font-size: 30px; line-height: 1.35; margin: 0 0 10px; letter-spacing: -0.5px; }
+  .sub { color: #c4ceda; font-size: 16px; margin: 0 0 24px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  h2 { color: var(--accent); font-size: 21px; margin: 34px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .card-head {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px 10px 18px;
+    background: var(--card-head); border-bottom: 1px solid var(--line);
+    font-size: 11.5px; font-weight: 700; letter-spacing: 1.5px; color: var(--muted);
+  }
+  .card-head .sp { flex: 1; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: transparent; color: #c9d4df; border: 1px solid #3b4d63; border-radius: 6px;
+    padding: 4px 10px; font-size: 12.5px; letter-spacing: 0;
+  }
+  .btn:hover { border-color: var(--accent); color: #fff; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #04131e; font-weight: 700; }
+  .btn.primary:hover { filter: brightness(1.1); color: #04131e; }
+  .btn svg { width: 14px; height: 14px; }
+
+  .prompt { padding: 22px 24px 8px; }
+  .row { margin-bottom: 20px; }
+  .row .k { font-weight: 800; color: #fff; margin-bottom: 4px; padding-left: 10px; border-left: 3px solid var(--accent); line-height: 1.3; }
+  .row .l { white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; line-height: 2; }
+  .mark { color: var(--mark); }
+  .f {
+    display: inline-block; min-width: 110px; max-width: 100%;
+    padding: 1px 12px; margin: 2px 1px; border-radius: 5px;
+    background: var(--field-bg); border: 1px dashed var(--field-line);
+    color: var(--field-text); font-weight: 700; line-height: 1.7;
+    white-space: pre-wrap; vertical-align: middle; outline: none; cursor: text;
+  }
+  .f:empty::before { content: attr(data-ph); opacity: .85; text-align: center; display: block; }
+  .f:focus { border-style: solid; background: #57422f; }
+  .f.filled { color: #fff; font-weight: 500; text-align: left; background: #3a3128; }
+  .hint { padding: 0 24px 16px; font-size: 12px; color: var(--muted); }
+
+  .core { padding: 18px 22px; }
+  .core h3 { margin: 0 0 14px; font-size: 16px; }
+  .pts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .pt { background: #142030; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .pt .n { color: var(--accent); font-weight: 800; font-size: 13px; }
+  .pt .t { font-weight: 700; margin: 2px 0 6px; }
+  .pt .d { color: #c4ceda; font-size: 14px; }
+  .notes { margin-top: 12px; white-space: pre-line; color: #c4ceda; font-size: 13.5px; background: #142030; border-radius: 10px; padding: 12px 16px; border: 1px solid var(--line); }
+
+  .tip {
+    display: flex; gap: 12px; align-items: flex-start; margin-top: 22px;
+    background: #2a2416; border: 1px solid #5c4a1f; border-radius: 10px; padding: 14px 18px; color: #f1e2bd;
+  }
+  .tip .ic { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--orange); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 13px; margin-top: 1px; }
+
+  .pager { display: flex; gap: 12px; margin-top: 36px; }
+  .pager a {
+    flex: 1; text-decoration: none; color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 16px; background: #111e2c; font-size: 14px;
+  }
+  .pager a:hover { border-color: var(--accent); }
+  .pager a small { display: block; color: var(--muted); font-size: 12px; }
+  .pager a.next { text-align: right; }
+
+  /* 홈 */
+  .home-lead { color: #c4ceda; font-size: 16px; }
+  .rules { margin: 18px 0 8px; color: #c4ceda; font-size: 14.5px; }
+  .rules li { margin: 4px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 10px; }
+  .grid a {
+    display: block; text-decoration: none; color: var(--text); background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+  }
+  .grid a:hover { border-color: var(--accent); }
+  .grid a b { display: block; font-size: 16px; }
+  .grid a span { color: var(--muted); font-size: 13px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0;
+    background: #e6edf3; color: #0b1622; padding: 10px 18px; border-radius: 8px; font-weight: 600;
+    transition: .2s; pointer-events: none; z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  #menu { display: none; }
+  @media (max-width: 860px) {
+    body { display: block; }
+    #side { position: fixed; z-index: 10; left: 0; top: 0; transform: translateX(-100%); transition: transform .2s; width: 300px; }
+    body.open #side { transform: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.5); }
+    main { height: auto; overflow: visible; }
+    .wrap { padding: 64px 16px 60px; }
+    #menu {
+      display: inline-flex; position: fixed; top: 12px; left: 12px; z-index: 9;
+      background: var(--side); color: var(--text); border: 1px solid #24476b; border-radius: 8px; padding: 8px 12px;
+    }
+    h1 { font-size: 24px; }
+    .prompt { padding: 18px 16px 4px; }
+    .hint { padding: 0 16px 14px; }
+  }
+</style>
+</head>
+<body>
+<button id="menu" aria-label="목차 열기">☰ 목차</button>
+<aside id="side">
+  <div class="brand" onclick="location.hash=''">
+    <b>AI시대의 보고서 리터러시</b>
+    <span>82개의 프롬프트로 AI를 더 잘 부리고, AI가 써준 초안을 제대로 고치기</span>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="프롬프트 검색 (예: 이메일, 헤드라인)"></div>
+  <nav id="nav"></nav>
+</aside>
+<main id="main"><div class="wrap" id="view"></div></main>
+<div class="toast" id="toast"></div>
+
+<script src="prompts.js"></script>
+<script>
+(function () {
+  const DATA = window.PROMPT_DATA;
+  const ICON_DOC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h2"/></svg>';
+  const ICON_DIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
+  const ICON_RESET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>';
+
+  // 순서대로 펼친 목록
+  const flat = [];
+  DATA.forEach((ch, ci) => ch.items.forEach((it, ii) => flat.push({ ch, ci, it, ii })));
+  const byId = Object.fromEntries(flat.map((x, i) => [x.it.id, i]));
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+    set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} },
+  };
+  const itemText = it => it.title + ' ' + (it.sub || '') + ' ' + it.rows.map(r => r.k + ' ' + r.v.flat().map(s => typeof s === 'string' ? s : s.f).join(' ')).join(' ');
+
+  // ── 사이드바
+  const nav = document.getElementById('nav');
+  function renderNav(query) {
+    const q = (query || '').trim().toLowerCase();
+    const cur = currentId();
+    nav.innerHTML = DATA.map((ch, ci) => {
+      const items = ch.items.map((it, ii) => ({ it, ii })).filter(x => !q || itemText(x.it).toLowerCase().includes(q));
+      if (q && !items.length) return '';
+      const hasCur = ch.items.some(it => it.id === cur);
+      const closed = !q && !hasCur && !openChaps.has(ci);
+      return `<div class="chap${closed ? ' closed' : ''}" data-ci="${ci}">
+        <button type="button">${ICON_DIR}<span>${esc(ch.title)}</span><span class="arrow">▾</span></button>
+        <ul>${items.map(({ it, ii }) => `<li><a href="#/${it.id}" class="${it.id === cur ? 'active' : ''}">${ICON_DOC}<span>${ii + 1}. ${esc(it.title)}</span></a></li>`).join('')}</ul>
+      </div>`;
+    }).join('') || '<p style="padding:12px 18px;color:var(--muted)">검색 결과가 없습니다.</p>';
+  }
+  const openChaps = new Set();
+  nav.addEventListener('click', e => {
+    const b = e.target.closest('.chap > button');
+    if (b) {
+      const box = b.parentElement, ci = +box.dataset.ci;
+      box.classList.toggle('closed');
+      box.classList.contains('closed') ? openChaps.delete(ci) : openChaps.add(ci);
+    }
+    if (e.target.closest('a')) document.body.classList.remove('open');
+  });
+  const qInput = document.getElementById('q');
+  qInput.addEventListener('input', () => renderNav(qInput.value));
+  document.getElementById('menu').onclick = () => document.body.classList.toggle('open');
+  document.getElementById('side').addEventListener('click', e => { if (e.target.id === 'side') document.body.classList.remove('open'); });
+
+  // ── 본문
+  const view = document.getElementById('view');
+  function currentId() { const m = location.hash.match(/^#\/(\d+)/); return m ? +m[1] : null; }
+
+  function renderLine(it, line, key) {
+    return line.map((seg, si) => {
+      if (typeof seg === 'string') return esc(seg).replace(/\[[^\]]*\]/g, m => `<span class="mark">${m}</span>`);
+      const k = `yes_prom:${it.id}:${key}:${si}`;
+      const v = store.get(k);
+      return `<span class="f${v ? ' filled' : ''}" contenteditable="plaintext-only" spellcheck="false" data-key="${k}" data-ph="${esc(seg.f || '직접 입력')}">${esc(v)}</span>`;
+    }).join('');
+  }
+
+  function renderHome() {
+    document.title = 'AI시대의 보고서 리터러시 · 프롬프트 82선';
+    view.innerHTML = `
+      <h1>AI시대의 보고서 리터러시</h1>
+      <p class="home-lead">82개의 프롬프트로 AI를 더 잘 부리고, AI가 써준 초안을 제대로 고치기</p>
+      <ul class="rules">
+        <li>왼쪽 목차에서 챕터와 프롬프트를 고르세요.</li>
+        <li><span class="f" style="min-width:0">점선 박스</span> 는 여러분이 직접 채우는 칸입니다. 클릭해서 내용을 넣으세요.</li>
+        <li><span class="mark">[확인 필요]</span> 처럼 노란 대괄호는 AI가 답에 붙이는 표시이니 그대로 두세요.</li>
+        <li>‘복사’ 버튼을 누르면 채운 내용까지 합쳐 프롬프트가 복사됩니다. 채우지 않은 칸은 [대괄호] 그대로 복사됩니다.</li>
+        <li>새 대화를 열면 <a href="#/3" style="color:var(--accent)">기본정보 블록</a>을 먼저 보내고, 각 프롬프트를 이어서 보내세요.</li>
+      </ul>
+      <h2>챕터</h2>
+      <div class="grid">${DATA.map(ch => `<a href="#/${ch.items[0].id}"><b>${esc(ch.title)}</b><span>프롬프트 ${ch.items.filter(i => i.label === '프롬프트').length}개</span></a>`).join('')}</div>`;
+  }
+
+  function renderItem(idx) {
+    const { ch, it, ii } = flat[idx];
+    document.title = it.title + ' · 보고서 리터러시';
+    const prev = flat[idx - 1], next = flat[idx + 1];
+    const rows = it.rows.map((r, ri) => `<div class="row"><div class="k">${esc(r.k)}</div>${r.v.map((line, li) => `<div class="l">${renderLine(it, line, ri + '.' + li)}</div>`).join('')}</div>`).join('');
+    const pts = it.points.map(([head, desc]) => {
+      const m = head.match(/^(\d+)\s*(.*)$/) || [null, '', head];
+      return `<div class="pt"><div class="n">${esc(m[1])}</div><div class="t">${esc(m[2])}</div><div class="d">${esc(desc)}</div></div>`;
+    }).join('');
+    view.innerHTML = `
+      <div class="crumb">${esc(ch.title)} · ${ii + 1}/${ch.items.length}</div>
+      <h1>${esc(it.title)}</h1>
+      ${it.sub ? `<p class="sub">${esc(it.sub)}</p>` : ''}
+      <div class="card">
+        <div class="card-head">${esc(it.label === '프롬프트' ? 'PROMPT' : it.label)}<span class="sp"></span>
+          <button class="btn" data-act="reset">${ICON_RESET}입력 지우기</button>
+          <button class="btn primary" data-act="copy">${ICON_COPY}복사</button>
+        </div>
+        <div class="prompt">${rows}</div>
+        <div class="hint">✍️ 점선 박스를 클릭해 직접 채운 뒤 복사할 수 있어요. 입력한 내용은 이 브라우저에만 저장됩니다.</div>
+      </div>
+      ${it.tip ? `<div class="tip"><span class="ic">!</span><div>${esc(it.tip)}</div></div>` : ''}
+      <h2>핵심 · ${esc(it.core)}</h2>
+      <div class="pts">${pts}</div>
+      ${(it.notes || []).map(n => `<div class="notes">${esc(n)}</div>`).join('')}
+      <div class="pager">
+        ${prev ? `<a href="#/${prev.it.id}"><small>← 이전</small>${esc(prev.it.title)}</a>` : '<span style="flex:1"></span>'}
+        ${next ? `<a class="next" href="#/${next.it.id}"><small>다음 →</small>${esc(next.it.title)}</a>` : '<span style="flex:1"></span>'}
+      </div>`;
+  }
+
+  function buildText(it) {
+    const fieldVal = (line, li, ri) => line.map((seg, si) => {
+      if (typeof seg === 'string') return seg;
+      const el = view.querySelector(`.f[data-key="yes_prom:${it.id}:${ri}.${li}:${si}"]`);
+      const v = el ? el.innerText.trim() : '';
+      return v || `[${seg.f || ' '}]`;
+    }).join('');
+    return it.rows.map((r, ri) => {
+      const lines = r.v.map((line, li) => fieldVal(line, li, ri));
+      return lines.length === 1 && !lines[0].includes('\n') ? `${r.k}: ${lines[0]}` : `${r.k}:\n${lines.join('\n')}`;
+    }).join('\n\n');
+  }
+
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {}
+      ta.remove(); return ok;
+    }
+  }
+  const toastEl = document.getElementById('toast');
+  let toastTimer;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600); }
+
+  view.addEventListener('input', e => {
+    const f = e.target.closest('.f[data-key]');
+    if (!f) return;
+    const v = f.innerText.trim();
+    if (!v) f.textContent = '';
+    f.classList.toggle('filled', !!v);
+    store.set(f.dataset.key, v);
+  });
+  view.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const it = flat[byId[currentId()]].it;
+    if (b.dataset.act === 'copy') toast(await copyText(buildText(it)) ? '프롬프트를 복사했어요' : '복사에 실패했어요. 직접 선택해 복사해 주세요');
+    if (b.dataset.act === 'reset') {
+      view.querySelectorAll('.f[data-key]').forEach(f => { f.textContent = ''; f.classList.remove('filled'); store.set(f.dataset.key, ''); });
+      toast('입력을 지웠어요');
+    }
+  });
+
+  function route() {
+    const id = currentId();
+    if (id != null && byId[id] != null) renderItem(byId[id]); else renderHome();
+    renderNav(qInput.value);
+    document.getElementById('main').scrollTop = 0; window.scrollTo(0, 0);
+    const a = nav.querySelector('a.active');
+    if (a) a.scrollIntoView({ block: 'nearest' });
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
