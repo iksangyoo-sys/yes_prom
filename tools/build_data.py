@@ -110,6 +110,27 @@ def parse_prompt(no, ts):
     return item
 
 
+def merge_pair(first, second):
+    """'프롬프트 1/2'와 '2/2' 장표를 프롬프트 하나로 합친다."""
+    first["label"] = "프롬프트"
+    first.pop("cont", None)
+    # 2/2를 가리키던 말을 합친 프롬프트 안의 항목 이름으로 바꾼다
+    target = second["rows"][0]["k"] if second["rows"] else ""
+    for row in first["rows"]:
+        for line in row["v"]:
+            for i, seg in enumerate(line):
+                if isinstance(seg, str) and "아래 2/2대로" in seg:
+                    line[i] = seg.replace("아래 2/2대로", f"아래 '{target}' 항목대로")
+    first["rows"] += second["rows"]
+    # 2/2의 '사용법' 중 이어 붙이기 안내는 빼고 나머지를 이어 번호를 매긴다
+    extra = [p for p in second["points"] if "이어 붙이기" not in p[0]]
+    n = len(first["points"])
+    for i, (head, desc) in enumerate(extra, n + 1):
+        first["points"].append([re.sub(r"^\d+", f"{i:02d}", head), desc])
+    if second.get("tip") and not first.get("tip"):
+        first["tip"] = second["tip"]
+
+
 def main(src, dst):
     prs = Presentation(src)
     chapters, cur = [], None
@@ -132,7 +153,12 @@ def main(src, dst):
         if "핵심" not in texts:
             print(f"건너뜀: {no}번 슬라이드", file=sys.stderr)
             continue
-        cur["items"].append(parse_prompt(no, ts))
+        item = parse_prompt(no, ts)
+        prev = cur["items"][-1] if cur["items"] else None
+        if item["label"].endswith("2/2") and prev and prev["label"].endswith("1/2"):
+            merge_pair(prev, item)
+            continue
+        cur["items"].append(item)
 
     with open(dst, "w", encoding="utf-8") as f:
         f.write("// tools/build_data.py로 생성한 파일입니다.\n")
